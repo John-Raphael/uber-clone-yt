@@ -6,8 +6,13 @@ import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplet
 import { GOOGLE_MAPS_APIKEY } from "@env";
 import { ScrollView } from "react-native-virtualized-view";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import { setDestination, setOrigin } from "../slices/navSlice";
+import { useDispatch } from "react-redux";
+import NavFavourites from "../components/NavFavourites";
 
 const HomeScreen = () => {
+  const dispatch = useDispatch();
+
   return (
     <SafeAreaView style={tw`bg-white h-full`}>
       <View style={tw`p-4`}>
@@ -29,24 +34,32 @@ const HomeScreen = () => {
             textInput: { fontSize: 18 },
           }}
           query={{
-            key: GOOGLE_MAPS_APIKEY,
+            key: process.env.GOOGLE_MAPS_APIKEY,
             language: "en",
           }}
           nearbyPlacesAPI="GooglePlacesSearch"
           debounce={400}
           onPress={(data, details = null) => {
-            console.log("Place selected:", data);
-            console.log("Place details:", details);
-            // Additional logging to check if the API is running
-            console.log("Google Places Autocomplete API is running!");
+            dispatch(
+              setOrigin({
+                location: details.geometry.location,
+                description: data.description,
+              })
+            );
+            dispatch(setDestination(null));
           }}
           fetchDetails={true}
+          enablePoweredByContainer={false}
+          minLength={2}
+          returnKeyType={"Search"}
         />
 
         <NavOptions />
+
+        <NavFavourites />
       </View>
 
-      <View style={{ flex: 1 }}>
+      {/* <View style={{ flex: 1 }}>
         <MapView
           style={StyleSheet.absoluteFillObject}
           provider={PROVIDER_GOOGLE} // Use Google Maps for Android
@@ -57,7 +70,7 @@ const HomeScreen = () => {
             longitudeDelta: 0.1, // Adjust the zoom level as needed
           }}
         />
-      </View>
+      </View> */}
     </SafeAreaView>
   );
 };
